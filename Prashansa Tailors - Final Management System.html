@@ -1,0 +1,2224 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prashansa Tailors - Management System</title>
+    <meta name="theme-color" content="#e11d55">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Prashansa Tailors">
+
+    <!-- Inline PWA Manifest & Pink Icon so phone installs it cleanly as an App -->
+    <script>
+        (function setupPWA() {
+            try {
+                const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="44" fill="#e11d55"/><circle cx="96" cy="96" r="64" fill="#ffe4ec" opacity="0.2"/><path d="M58 52L76 42H116L134 52L152 72L134 86L122 76V146H70V76L58 86L40 72L58 52Z" fill="#ffe4ec" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"/><path d="M78 43C78 54 86 62 96 62C106 62 114 54 114 43" fill="none" stroke="#e11d55" stroke-width="5" stroke-linecap="round"/><circle cx="96" cy="88" r="5" fill="#e11d55"/><circle cx="96" cy="108" r="5" fill="#e11d55"/></svg>`;
+                const iconUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgIcon)));
+
+                const appleLink = document.createElement('link');
+                appleLink.rel = 'apple-touch-icon';
+                appleLink.href = iconUrl;
+                document.head.appendChild(appleLink);
+
+                const manifest = {
+                    name: "Prashansa Tailors",
+                    short_name: "Prashansa Tailors",
+                    description: "Prashansa Tailors Orders, Customers, Stock, Finance & PDF App",
+                    start_url: "./",
+                    display: "standalone",
+                    background_color: "#fff5f8",
+                    theme_color: "#e11d55",
+                    icons: [
+                        {
+                            src: iconUrl,
+                            sizes: "192x192",
+                            type: "image/svg+xml",
+                            purpose: "any maskable"
+                        }
+                    ]
+                };
+                const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+                const manifestUrl = URL.createObjectURL(manifestBlob);
+                const manifestLink = document.createElement('link');
+                manifestLink.rel = 'manifest';
+                manifestLink.href = manifestUrl;
+                document.head.appendChild(manifestLink);
+            } catch (err) {
+                console.warn("PWA setup skipped:", err);
+            }
+        })();
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Poppins & Noto Sans Sinhala -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf.js for Direct PDF Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'Noto Sans Sinhala', 'sans-serif'],
+                    },
+                    colors: {
+                        pinktheme: {
+                            50: '#fff1f5',
+                            100: '#ffe4ec',
+                            200: '#fecdd9',
+                            300: '#fda4ba',
+                            400: '#fb7193',
+                            500: '#f43f6e',
+                            600: '#e11d55',
+                            700: '#be1245',
+                            800: '#9f123d',
+                            900: '#881337',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Poppins', 'Noto Sans Sinhala', sans-serif;
+            background-color: #fff5f8;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 90px;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #fff1f5; }
+        ::-webkit-scrollbar-thumb { background: #fda4ba; border-radius: 10px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .pink-gradient-header {
+            background: linear-gradient(135deg, #e11d55 0%, #f43f6e 55%, #fb7193 100%);
+        }
+        .soft-card {
+            background: #ffffff;
+            border: 1px solid #ffe4ec;
+            box-shadow: 0 4px 15px rgba(244, 63, 110, 0.06);
+        }
+        .nav-active {
+            color: #e11d55;
+            transform: translateY(-2px);
+        }
+        .nav-active i {
+            background-color: #ffe4ec;
+            padding: 6px 14px;
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased select-none">
+
+    <!-- ==================== TOP SUB-HEADER ==================== -->
+    <header id="sub-header" class="hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-pinktheme-100 px-4 py-3 flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-3">
+            <button onclick="switchTab('home')" class="w-9 h-9 rounded-full bg-pinktheme-50 text-pinktheme-600 flex items-center justify-center active:scale-95 transition">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div>
+                <h1 id="sub-header-title" class="font-bold text-base text-pinktheme-800 leading-tight">Orders</h1>
+                <p id="sub-header-subtitle" class="text-xs text-pinktheme-500">ඇණවුම් කළමනාකරණය</p>
+            </div>
+        </div>
+        <button onclick="switchTab('home')" class="text-xs font-semibold text-pinktheme-600 bg-pinktheme-50 px-3 py-1.5 rounded-full">
+            <i class="fa-solid fa-house mr-1"></i> මුල් පිටුව
+        </button>
+    </header>
+
+    <!-- ==================== MAIN CONTAINER ==================== -->
+    <main class="max-w-lg mx-auto">
+
+        <!-- ============================================================ -->
+        <!-- 1. WELCOME / HOME SCREEN (මුල් පිටුව)                        -->
+        <!-- ============================================================ -->
+        <section id="tab-home" class="tab-content block">
+            <!-- Welcome Header Banner -->
+            <div class="pink-gradient-header text-white rounded-b-[2.2rem] px-5 pt-6 pb-9 shadow-lg relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-36 h-36 bg-white/10 rounded-full"></div>
+                <div class="absolute bottom-2 -left-8 w-24 h-24 bg-white/10 rounded-full"></div>
+
+                <div class="flex justify-between items-start relative z-10">
+                    <div class="flex items-center gap-3.5">
+                        <!-- Owner Profile Photo -->
+                        <div class="relative cursor-pointer" onclick="openOwnerModal()">
+                            <img id="owner-avatar" src="https://placehold.co/150x150/ffe4ec/e11d55?text=Amma" alt="Owner" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md bg-pinktheme-100">
+                            <div class="absolute bottom-0 right-0 w-6 h-6 bg-white text-pinktheme-600 rounded-full flex items-center justify-center text-xs shadow">
+                                <i class="fa-solid fa-camera"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="inline-block bg-white/20 backdrop-blur-sm text-white text-[11px] font-medium px-2.5 py-0.5 rounded-full mb-1">
+                                ✨ ආයුබෝවන් / Welcome
+                            </span>
+                            <h1 class="text-xl font-bold tracking-wide leading-tight">Prashansa Tailors</h1>
+                            <p class="text-pinktheme-100 text-xs font-medium mt-0.5 flex items-center gap-1.5">
+                                <i class="fa-solid fa-crown text-yellow-200 text-[10px]"></i>
+                                <span id="owner-name-display">Prashansa / අම්මා</span>
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="openOwnerModal()" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition" title="Settings & Backup">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+
+                <!-- Quick Summary Strip -->
+                <div class="grid grid-cols-3 gap-2.5 mt-5 relative z-10">
+                    <div onclick="switchTab('orders')" class="bg-white/15 backdrop-blur-md rounded-2xl p-2.5 border border-white/20 cursor-pointer">
+                        <p class="text-[10px] text-pinktheme-100">මහමින් පවතින</p>
+                        <p class="text-lg font-bold mt-0.5"><span id="home-pending-count">0</span> <span class="text-[10px] font-normal">ඇණවුම්</span></p>
+                    </div>
+                    <div onclick="switchTab('customers')" class="bg-white/15 backdrop-blur-md rounded-2xl p-2.5 border border-white/20 cursor-pointer">
+                        <p class="text-[10px] text-pinktheme-100">ලැබීමට ඇති හිඟ</p>
+                        <p class="text-sm font-bold mt-1 text-yellow-100">Rs.<span id="home-total-due">0</span></p>
+                    </div>
+                    <div onclick="switchTab('finance')" class="bg-white/15 backdrop-blur-md rounded-2xl p-2.5 border border-white/20 cursor-pointer">
+                        <p class="text-[10px] text-pinktheme-100">මේ මාසේ ආදායම</p>
+                        <p class="text-sm font-bold mt-1">Rs.<span id="home-month-income">0</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 -mt-5 relative z-20 space-y-4">
+                <!-- 1. Gentle Due Date Reminder Card -->
+                <div class="soft-card rounded-2xl p-4 border-l-4 border-l-pinktheme-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-full bg-pinktheme-100 text-pinktheme-600 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-bell"></i>
+                            </span>
+                            <div>
+                                <h2 class="text-xs font-bold text-slate-800">ළඟදීම දෙන්න තියෙන ඇඳුම් (සිහිකැඳවීම)</h2>
+                                <p class="text-[10px] text-slate-500">Upcoming Delivery Reminders</p>
+                            </div>
+                        </div>
+                        <button onclick="switchTab('orders')" class="text-[11px] font-semibold text-pinktheme-600">සියල්ල →</button>
+                    </div>
+                    <div id="home-reminders-list" class="space-y-2 mt-2"></div>
+                </div>
+
+                <!-- 2. Pending Payments / Credit Alert Card (හිඟ මුදල් සිහිකැඳවීම) -->
+                <div id="home-credit-box" class="hidden soft-card rounded-2xl p-4 border-l-4 border-l-rose-500 bg-rose-50/30">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-hand-holding-dollar"></i>
+                            </span>
+                            <div>
+                                <h2 class="text-xs font-bold text-rose-900">හිඟ මුදල් / ණය ලැබීමට ඇති අය</h2>
+                                <p class="text-[10px] text-rose-600">Pending Credit Reminders</p>
+                            </div>
+                        </div>
+                        <button onclick="switchTab('customers')" class="text-[11px] font-semibold text-rose-600">විස්තර →</button>
+                    </div>
+                    <div id="home-credit-list" class="space-y-2 mt-2"></div>
+                </div>
+
+                <!-- 3. Low Stock Gentle Alert -->
+                <div id="home-stock-alert" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-amber-900">රෙදි / නූල් තොග අඩු වී ඇත!</p>
+                            <p id="home-stock-alert-text" class="text-[11px] text-amber-700"></p>
+                        </div>
+                    </div>
+                    <button onclick="switchTab('inventory')" class="text-xs bg-amber-500 text-white px-3 py-1.5 rounded-xl font-medium shrink-0">බලන්න</button>
+                </div>
+
+                <!-- 3.5 Subtle & Compact Welcome Showcase Strip (Non-intrusive) -->
+                <div id="home-showcase-card" class="soft-card rounded-xl px-3 py-2">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-sparkles text-pinktheme-500 text-[11px]"></i>
+                            <span class="text-[10px] font-bold text-pinktheme-800">Showcase</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="toggleShowcaseStrip()" id="showcase-toggle-btn" class="text-[10px] font-medium text-slate-400 hover:text-pinktheme-600">සඟවන්න</button>
+                            <button onclick="switchTab('gallery')" class="text-[10px] font-semibold text-pinktheme-600">Gallery →</button>
+                        </div>
+                    </div>
+                    <div id="showcase-strip-body" class="flex gap-2 overflow-x-auto no-scrollbar">
+                        <div onclick="viewFullImage('https://placehold.co/600x600/ffe4ec/be1245?text=Saree+Blouse+%26+Osariya', 'සාරි හැට්ට සහ ඔසරි')" class="relative w-20 h-14 rounded-lg overflow-hidden shrink-0 cursor-pointer border border-pinktheme-200 bg-gradient-to-br from-pinktheme-100 to-pinktheme-50 flex flex-col items-center justify-center">
+                            <svg class="w-6 h-6 text-pinktheme-600 mb-2" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 14L26 10H38L44 14L52 22L45 28L41 24V52H23V24L19 28L12 22L20 14Z" fill="#fecdd9" stroke="#e11d55" stroke-width="2.5" stroke-linejoin="round"/>
+                                <path d="M26 10C26 14 29 17 32 17C35 17 38 14 38 10" stroke="#e11d55" stroke-width="2.5" stroke-linecap="round"/>
+                                <circle cx="32" cy="30" r="2.2" fill="#be1245"/>
+                                <circle cx="32" cy="38" r="2.2" fill="#be1245"/>
+                            </svg>
+                            <span class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-pinktheme-900/80 to-transparent text-white text-[8px] font-semibold px-1 py-0.5 truncate text-center">හැට්ට</span>
+                        </div>
+
+                        <div onclick="viewFullImage('https://placehold.co/600x600/fff1f5/e11d55?text=School+%26+Dhamma+Uniforms', 'පාසල් සහ දහම් පාසල්')" class="relative w-20 h-14 rounded-lg overflow-hidden shrink-0 cursor-pointer border border-pinktheme-200 bg-gradient-to-br from-rose-50 to-pinktheme-100 flex flex-col items-center justify-center">
+                            <svg class="w-6 h-6 text-rose-600 mb-2" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 14L27 10H37L46 14L53 23L46 29L42 25V34H22V25L18 29L11 23L18 14Z" fill="#ffe4ec" stroke="#e11d55" stroke-width="2.5" stroke-linejoin="round"/>
+                                <path d="M22 34H42L45 53H19L22 34Z" fill="#fecdd9" stroke="#e11d55" stroke-width="2.5" stroke-linejoin="round"/>
+                                <path d="M32 34V53" stroke="#e11d55" stroke-width="2" stroke-dasharray="3 2"/>
+                            </svg>
+                            <span class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-pinktheme-900/80 to-transparent text-white text-[8px] font-semibold px-1 py-0.5 truncate text-center">නිල ඇඳුම්</span>
+                        </div>
+
+                        <div onclick="viewFullImage('https://placehold.co/600x600/fecdd9/9f123d?text=Night+Dress+%26+Nighty', 'කාන්තා සහ ළමා නයිට් ඩ්‍රෙස්')" class="relative w-20 h-14 rounded-lg overflow-hidden shrink-0 cursor-pointer border border-pinktheme-200 bg-gradient-to-br from-pinktheme-100 to-rose-100 flex flex-col items-center justify-center">
+                            <svg class="w-6 h-6 text-pinktheme-700 mb-2" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M23 11H41L44 21L50 53H14L20 21L23 11Z" fill="#ffe4ec" stroke="#be1245" stroke-width="2.5" stroke-linejoin="round"/>
+                                <path d="M24 11C24 16 28 19 32 19C36 19 40 16 40 11" stroke="#be1245" stroke-width="2.5" stroke-linecap="round"/>
+                                <path d="M44 15C48 14 51 11 51 8C48 8 45 10 44 15Z" fill="#f43f6e"/>
+                            </svg>
+                            <span class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-pinktheme-900/80 to-transparent text-white text-[8px] font-semibold px-1 py-0.5 truncate text-center">නයිට් ඩ්‍රෙස්</span>
+                        </div>
+
+                        <div onclick="viewFullImage('https://placehold.co/600x600/ffe4ec/f43f6e?text=Frocks+%26+Kids+Wear', 'ගවුම් සහ ළමා ඇඳුම්')" class="relative w-20 h-14 rounded-lg overflow-hidden shrink-0 cursor-pointer border border-pinktheme-200 bg-gradient-to-br from-pinktheme-50 to-pinktheme-100 flex flex-col items-center justify-center">
+                            <svg class="w-6 h-6 text-pinktheme-500 mb-2" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M24 12H40L37 26L51 52H13L27 26L24 12Z" fill="#fecdd9" stroke="#f43f6e" stroke-width="2.5" stroke-linejoin="round"/>
+                                <path d="M27 26H37" stroke="#e11d55" stroke-width="2.5" stroke-linecap="round"/>
+                                <circle cx="32" cy="36" r="2.5" fill="#e11d55"/>
+                            </svg>
+                            <span class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-pinktheme-900/80 to-transparent text-white text-[8px] font-semibold px-1 py-0.5 truncate text-center">ගවුම්</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Quick Navigation Grid -->
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-pinktheme-700 mb-2.5 px-1">ප්‍රධාන මෙනුව / Quick Menu</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="switchTab('orders')" class="soft-card p-3.5 rounded-2xl text-left hover:border-pinktheme-300 active:scale-95 transition flex flex-col justify-between">
+                            <div class="w-10 h-10 rounded-2xl bg-pinktheme-100 text-pinktheme-600 flex items-center justify-center text-lg mb-2.5">
+                                <i class="fa-solid fa-scissors"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">ඇණවුම්</h4>
+                                <p class="text-[11px] text-pinktheme-500 font-medium">Orders & Finish Tick</p>
+                            </div>
+                        </button>
+
+                        <button onclick="switchTab('customers')" class="soft-card p-3.5 rounded-2xl text-left hover:border-pinktheme-300 active:scale-95 transition flex flex-col justify-between">
+                            <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-lg mb-2.5">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">පාරිභෝගිකයින්</h4>
+                                <p class="text-[11px] text-rose-500 font-medium">Profiles & හිඟ මුදල්</p>
+                            </div>
+                        </button>
+
+                        <button onclick="switchTab('gallery')" class="soft-card p-3.5 rounded-2xl text-left hover:border-pinktheme-300 active:scale-95 transition flex flex-col justify-between">
+                            <div class="w-10 h-10 rounded-2xl bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center text-lg mb-2.5">
+                                <i class="fa-solid fa-shirt"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">මහපු ඇඳුම්</h4>
+                                <p class="text-[11px] text-fuchsia-500 font-medium">Portfolio Gallery</p>
+                            </div>
+                        </button>
+
+                        <button onclick="switchTab('finance')" class="soft-card p-3.5 rounded-2xl text-left hover:border-pinktheme-300 active:scale-95 transition flex flex-col justify-between">
+                            <div class="w-10 h-10 rounded-2xl bg-pink-100 text-pink-700 flex items-center justify-center text-lg mb-2.5">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">ආදායම් / වියදම්</h4>
+                                <p class="text-[11px] text-pink-600 font-medium">Finance & PDF Report</p>
+                            </div>
+                        </button>
+
+                        <button onclick="switchTab('inventory')" class="col-span-2 soft-card p-3.5 rounded-2xl text-left hover:border-pinktheme-300 active:scale-95 transition flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-pinktheme-500 to-rose-400 text-white flex items-center justify-center text-lg shadow-sm">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-slate-800">රෙදි තොග සහ මැෂින්</h4>
+                                    <p class="text-[11px] text-slate-500">Stock & Machines Inventory</p>
+                                </div>
+                            </div>
+                            <div class="w-8 h-8 rounded-full bg-pinktheme-50 text-pinktheme-600 flex items-center justify-center">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 2. ORDERS TAB (ඇණවුම් කළමනාකරණය)                           -->
+        <!-- ============================================================ -->
+        <section id="tab-orders" class="tab-content hidden px-4 pt-4 space-y-4">
+            <div class="flex items-center justify-between gap-2">
+                <h2 class="text-sm font-bold text-pinktheme-800">ඇණවුම් ලැයිස්තුව</h2>
+                <button onclick="openOrderModal()" class="bg-pinktheme-600 hover:bg-pinktheme-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 active:scale-95 transition">
+                    <i class="fa-solid fa-plus"></i> අලුත් ඇණවුමක්
+                </button>
+            </div>
+
+            <div class="grid grid-cols-3 bg-pinktheme-100/80 p-1 rounded-xl gap-1">
+                <button onclick="filterOrders('pending')" id="btn-filter-pending" class="py-2 text-[11px] font-bold rounded-lg bg-white text-pinktheme-700 shadow-sm transition">
+                    මහමින් පවතින
+                </button>
+                <button onclick="filterOrders('completed')" id="btn-filter-completed" class="py-2 text-[11px] font-semibold rounded-lg text-slate-600 transition">
+                    මහලා අවසන් ✓
+                </button>
+                <button onclick="filterOrders('unpaid')" id="btn-filter-unpaid" class="py-2 text-[11px] font-semibold rounded-lg text-slate-600 transition">
+                    හිඟ මුදල් ඇති
+                </button>
+            </div>
+
+            <div id="orders-list" class="space-y-3.5"></div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3. CUSTOMERS & CREDIT TAB (පාරිභෝගිකයින් සහ හිඟ මුදල්)         -->
+        <!-- ============================================================ -->
+        <section id="tab-customers" class="tab-content hidden px-4 pt-4 space-y-4">
+            <div class="flex gap-2">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-search absolute left-3.5 top-3 text-pinktheme-400 text-sm"></i>
+                    <input type="text" id="customer-search" oninput="renderCustomers()" placeholder="නම හෝ දුරකථන අංකය සොයන්න..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-pinktheme-200 rounded-xl text-xs focus:outline-none focus:border-pinktheme-500">
+                </div>
+                <button onclick="openCustomerModal()" class="bg-pinktheme-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 shrink-0 active:scale-95 transition">
+                    <i class="fa-solid fa-user-plus"></i> අලුත් අයෙක්
+                </button>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="toggleCustomerDebtFilter(false)" id="cust-filter-all" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-pinktheme-600 text-white">සියලුම අය (All)</button>
+                <button onclick="toggleCustomerDebtFilter(true)" id="cust-filter-debt" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white border border-rose-200 text-rose-600">හිඟ මුදල් ඇති අය (Credit)</button>
+            </div>
+
+            <div id="customers-list" class="space-y-3"></div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4. DESIGN GALLERY TAB (මහපු ඇඳුම් එකතුව)                     -->
+        <!-- ============================================================ -->
+        <section id="tab-gallery" class="tab-content hidden px-4 pt-4 space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-800">අම්මා මහපු ලස්සන ඇඳුම්</h2>
+                    <p class="text-[11px] text-slate-500">අලුත් පාරිභෝගිකයින්ට පෙන්වීමට</p>
+                </div>
+                <button onclick="openGalleryModal()" class="bg-pinktheme-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 active:scale-95 transition">
+                    <i class="fa-solid fa-camera"></i> ෆොටෝ දාන්න
+                </button>
+            </div>
+
+            <div id="gallery-category-pills" class="flex gap-2 overflow-x-auto pb-1 no-scrollbar"></div>
+
+            <div id="gallery-grid" class="grid grid-cols-2 gap-3"></div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. STOCK & MACHINES TAB (රෙදි තොග සහ මැෂින්)                   -->
+        <!-- ============================================================ -->
+        <section id="tab-inventory" class="tab-content hidden px-4 pt-4 space-y-5">
+            <div id="inventory-alert-banner" class="hidden bg-red-50 border border-red-200 rounded-2xl p-3.5">
+                <div class="flex items-center gap-2 text-red-700 font-bold text-xs mb-1">
+                    <i class="fa-solid fa-bell fa-shake"></i>
+                    <span>තොග අවසන් වීමට ආසන්නයි! (Low Stock Alert)</span>
+                </div>
+                <p id="inventory-alert-items" class="text-xs text-red-600"></p>
+            </div>
+
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-sm font-bold text-pinktheme-800">රෙදි සහ උපකරණ තොග (Fabric Stock)</h2>
+                        <p class="text-[11px] text-slate-500">පාසල් රෙදි, දහම් පාසල් රෙදි, නූල් ආදිය</p>
+                    </div>
+                    <button onclick="openStockModal()" class="bg-pinktheme-600 text-white px-3 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-1">
+                        <i class="fa-solid fa-plus"></i> එකතු කරන්න
+                    </button>
+                </div>
+                <div id="stock-list" class="space-y-2.5"></div>
+            </div>
+
+            <div class="space-y-3 pt-2 border-t border-pinktheme-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-sm font-bold text-pinktheme-800">මහන මැෂින් විස්තර (My Machines)</h2>
+                        <p class="text-[11px] text-slate-500">මැෂින් වල තත්ත්වය සහ සර්විස් දින</p>
+                    </div>
+                    <button onclick="openMachineModal()" class="bg-rose-500 text-white px-3 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-1">
+                        <i class="fa-solid fa-plus"></i> මැෂිමක්
+                    </button>
+                </div>
+                <div id="machines-list" class="space-y-2.5"></div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6. FINANCE & MONTHLY PDF REPORT TAB                          -->
+        <!-- ============================================================ -->
+        <section id="tab-finance" class="tab-content hidden px-4 pt-4 space-y-4">
+            <div class="flex items-center justify-between gap-2">
+                <input type="month" id="finance-month-picker" onchange="renderFinance()" class="bg-white border border-pinktheme-200 text-xs font-bold text-pinktheme-800 rounded-xl px-3 py-2 focus:outline-none">
+                <button onclick="downloadMonthlyPDF()" class="bg-pinktheme-700 hover:bg-pinktheme-800 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold shadow flex items-center gap-1.5 active:scale-95 transition">
+                    <i class="fa-solid fa-file-pdf"></i> මාසික වාර්තාව PDF ගන්න
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="soft-card p-3.5 rounded-2xl border-l-4 border-l-emerald-500">
+                    <p class="text-[11px] text-slate-500 font-medium">මුළු ආදායම (Total Income)</p>
+                    <p class="text-base font-bold text-emerald-600 mt-1">Rs. <span id="fin-income">0</span></p>
+                </div>
+                <div class="soft-card p-3.5 rounded-2xl border-l-4 border-l-rose-500">
+                    <p class="text-[11px] text-slate-500 font-medium">ව්‍යාපාර වියදම් (Business Exp.)</p>
+                    <p class="text-base font-bold text-rose-600 mt-1">Rs. <span id="fin-shop-exp">0</span></p>
+                </div>
+                <div class="soft-card p-3.5 rounded-2xl border-l-4 border-l-pinktheme-600 bg-pinktheme-50/40">
+                    <p class="text-[11px] text-slate-600 font-medium">ශුද්ධ ලාභය (Net Profit)</p>
+                    <p class="text-base font-bold text-pinktheme-700 mt-1">Rs. <span id="fin-profit">0</span></p>
+                </div>
+                <div class="soft-card p-3.5 rounded-2xl border-l-4 border-l-amber-500">
+                    <p class="text-[11px] text-slate-500 font-medium">ගෙදර වියදම් (Home Exp.)</p>
+                    <p class="text-base font-bold text-amber-600 mt-1">Rs. <span id="fin-home-exp">0</span></p>
+                </div>
+            </div>
+
+            <div class="pink-gradient-header text-white p-4 rounded-2xl shadow flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-pinktheme-100">ගෙදර වියදම් අඩු කළ පසු අතේ ඉතිරි මුදල</p>
+                    <p class="text-[11px] text-white/80">Remaining Cash in Hand</p>
+                </div>
+                <p class="text-xl font-bold">Rs. <span id="fin-remaining">0</span></p>
+            </div>
+
+            <button onclick="openTransactionModal()" class="w-full py-3 bg-pinktheme-600 hover:bg-pinktheme-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2 active:scale-95 transition">
+                <i class="fa-solid fa-plus-circle text-sm"></i> ආදායමක් හෝ වියදමක් ඇතුළත් කරන්න
+            </button>
+
+            <div>
+                <h3 class="text-xs font-bold text-slate-700 mb-2">මෙම මාසයේ ගනුදෙනු (Transactions)</h3>
+                <div id="transactions-list" class="space-y-2"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== BOTTOM NAVIGATION BAR ==================== -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-pinktheme-100 px-2 py-2 z-40 shadow-[0_-4px_20px_rgba(244,63,110,0.08)]">
+        <div class="max-w-lg mx-auto grid grid-cols-5 text-center">
+            <button onclick="switchTab('home')" id="nav-home" class="nav-btn nav-active flex flex-col items-center justify-center gap-1 text-[10px] font-bold transition">
+                <i class="fa-solid fa-house text-base"></i>
+                <span>මුල් පිටුව</span>
+            </button>
+            <button onclick="switchTab('orders')" id="nav-orders" class="nav-btn text-slate-400 flex flex-col items-center justify-center gap-1 text-[10px] font-semibold transition">
+                <i class="fa-solid fa-scissors text-base"></i>
+                <span>ඇණවුම්</span>
+            </button>
+            <button onclick="switchTab('customers')" id="nav-customers" class="nav-btn text-slate-400 flex flex-col items-center justify-center gap-1 text-[10px] font-semibold transition">
+                <i class="fa-solid fa-users text-base"></i>
+                <span>පාරිභෝගික</span>
+            </button>
+            <button onclick="switchTab('inventory')" id="nav-inventory" class="nav-btn text-slate-400 flex flex-col items-center justify-center gap-1 text-[10px] font-semibold transition relative">
+                <i class="fa-solid fa-layer-group text-base"></i>
+                <span>තොග/මැෂින්</span>
+                <span id="nav-stock-dot" class="hidden absolute top-0 right-4 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <button onclick="switchTab('finance')" id="nav-finance" class="nav-btn text-slate-400 flex flex-col items-center justify-center gap-1 text-[10px] font-semibold transition">
+                <i class="fa-solid fa-wallet text-base"></i>
+                <span>මුදල්/PDF</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===================================================================== -->
+    <!-- MODALS                                                                -->
+    <!-- ===================================================================== -->
+
+    <div id="modal-owner" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-pinktheme-100 pb-3">
+                <h3 class="font-bold text-pinktheme-800 text-sm">අයිතිකරු සහ දත්ත ආරක්ෂාව (Settings)</h3>
+                <button onclick="closeModal('modal-owner')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div class="flex flex-col items-center">
+                    <img id="edit-owner-preview" src="https://placehold.co/150x150/ffe4ec/e11d55?text=Amma" class="w-20 h-20 rounded-full object-cover border-2 border-pinktheme-300 mb-2">
+                    <label class="bg-pinktheme-100 text-pinktheme-700 px-3 py-1.5 rounded-full text-xs font-bold cursor-pointer">
+                        <i class="fa-solid fa-camera mr-1"></i> අම්මාගේ ෆොටෝ එක වෙනස් කරන්න
+                        <input type="file" accept="image/*" class="hidden" onchange="previewImage(this, 'edit-owner-preview', 'ownerPhotoBase64')">
+                    </label>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">අම්මාගේ නම (Shop Owner Name)</label>
+                    <input type="text" id="edit-owner-name" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-pinktheme-500">
+                </div>
+                <button onclick="saveOwnerProfile()" class="w-full bg-pinktheme-600 text-white py-2.5 rounded-xl text-xs font-bold shadow">වෙනස්කම් සුරකින්න (Save Profile)</button>
+            </div>
+
+            <div class="pt-3 border-t border-pinktheme-100 space-y-2">
+                <p class="text-xs font-bold text-slate-700">දත්ත Backup / Restore (Phone මාරු කිරීමේදී)</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="exportBackupJSON()" class="bg-emerald-50 border border-emerald-200 text-emerald-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-download"></i> Backup ගන්න
+                    </button>
+                    <label class="bg-blue-50 border border-blue-200 text-blue-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 cursor-pointer">
+                        <i class="fa-solid fa-upload"></i> Restore කරන්න
+                        <input type="file" accept=".json" class="hidden" onchange="importBackupJSON(this)">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-order" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto p-5 space-y-3.5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-pinktheme-100 pb-3 sticky top-0 bg-white z-10">
+                <h3 id="order-modal-title" class="font-bold text-pinktheme-800 text-sm">අලුත් ඇණවුමක් (New Order)</h3>
+                <button onclick="closeModal('modal-order')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <input type="hidden" id="order-id">
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">පාරිභෝගිකයා තෝරන්න (Select Customer)</label>
+                    <select id="order-customer-select" onchange="fillCustomerFromSelect()" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2.5 bg-pinktheme-50/40 font-medium">
+                        <option value="">-- අලුත් පාරිභෝගිකයෙක් (New Customer) --</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">නම (Name) *</label>
+                        <input type="text" id="order-cust-name" placeholder="උදා: නයනා කුමාරි" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">දුරකථන අංකය (Phone) *</label>
+                        <input type="tel" id="order-cust-phone" placeholder="0771234567" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">ඇඳුම් වර්ගය (Dress Category) *</label>
+                    <select id="order-dress-category" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2.5 bg-white font-medium text-pinktheme-900"></select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">අමතර විස්තර (Sub-detail)</label>
+                        <input type="text" id="order-dress-detail" placeholder="උදා: පාසල් ගවුම් 2ක්" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">භාරදෙන දිනය (Due Date) *</label>
+                        <input type="date" id="order-due-date" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                    </div>
+                </div>
+
+                <div class="bg-pinktheme-50 p-3 rounded-2xl border border-pinktheme-100 space-y-2.5">
+                    <label class="block font-bold text-pinktheme-800">රෙදි සපයන්නේ කවුද? (Fabric Source)</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="fabricSource" value="customer" checked onchange="toggleAdvanceField()" class="peer hidden">
+                            <div class="p-2 text-center rounded-xl border border-pinktheme-200 bg-white peer-checked:bg-pinktheme-600 peer-checked:text-white font-semibold transition">
+                                කස්ටමර්ගේ රෙදි<br><span class="text-[10px] font-normal">(Customer Fabric)</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="fabricSource" value="shop" onchange="toggleAdvanceField()" class="peer hidden">
+                            <div class="p-2 text-center rounded-xl border border-pinktheme-200 bg-white peer-checked:bg-pinktheme-600 peer-checked:text-white font-semibold transition">
+                                අම්මාගේ රෙදි වලින්<br><span class="text-[10px] font-normal">(Shop Fabric)</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5 pt-1">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">මුළු ගාණ (Total Rs.) *</label>
+                            <input type="number" id="order-total" oninput="calcOrderBalance()" placeholder="1500" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2 bg-white">
+                        </div>
+                        <div>
+                            <label id="advance-label" class="block font-semibold text-slate-700 mb-1">අත්තිකාරම් (Advance)</label>
+                            <input type="number" id="order-advance" oninput="calcOrderBalance()" placeholder="0" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2 bg-white">
+                        </div>
+                    </div>
+                    <p class="text-right font-bold text-pinktheme-700">ඉතිරි හිඟ මුදල (Balance Due): Rs. <span id="order-balance-preview">0</span></p>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">විශේෂ උපදෙස් (Special Notes)</label>
+                    <textarea id="order-notes" rows="2" placeholder="උදා: කර ටිකක් පළල් කරන්න, ප්ලීට්ස් තියන්න..." class="w-full border border-pinktheme-200 rounded-xl px-3 py-2"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div class="border border-dashed border-pinktheme-300 rounded-xl p-2.5 text-center bg-pinktheme-50/30">
+                        <p class="font-semibold text-pinktheme-800 mb-1">මිනුම් පොතේ ෆොටෝ</p>
+                        <img id="preview-meas-img" class="hidden w-full h-20 object-cover rounded-lg mb-1.5">
+                        <label class="inline-block bg-white border border-pinktheme-200 text-pinktheme-600 px-2.5 py-1 rounded-lg cursor-pointer font-semibold">
+                            <i class="fa-solid fa-camera mr-1"></i> ෆොටෝ ගන්න
+                            <input type="file" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-meas-img', 'tempMeasImg')">
+                        </label>
+                    </div>
+                    <div class="border border-dashed border-pinktheme-300 rounded-xl p-2.5 text-center bg-pinktheme-50/30">
+                        <p class="font-semibold text-pinktheme-800 mb-1">මෝස්තරයේ ෆොටෝ</p>
+                        <img id="preview-design-img" class="hidden w-full h-20 object-cover rounded-lg mb-1.5">
+                        <label class="inline-block bg-white border border-pinktheme-200 text-pinktheme-600 px-2.5 py-1 rounded-lg cursor-pointer font-semibold">
+                            <i class="fa-solid fa-image mr-1"></i> තෝරන්න
+                            <input type="file" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-design-img', 'tempDesignImg')">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="saveOrder()" class="w-full bg-pinktheme-600 hover:bg-pinktheme-700 text-white py-3 rounded-xl text-xs font-bold shadow-lg">
+                ඇණවුම සුරකින්න (Save Order)
+            </button>
+        </div>
+    </div>
+
+    <div id="modal-finish-whatsapp" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-5 text-center space-y-4 shadow-2xl border-2 border-emerald-200">
+            <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mx-auto">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-base text-slate-800">ඇඳුම මහලා අවසන්! (Finished ✓)</h3>
+                <p id="finish-modal-subtitle" class="text-xs text-slate-500 mt-1"></p>
+            </div>
+            <div class="bg-emerald-50/70 p-3 rounded-2xl text-left text-xs text-slate-700 border border-emerald-100">
+                <p class="font-bold text-emerald-800 mb-1">පාරිභෝගිකයාට යවන පණිවිඩය:</p>
+                <p id="finish-wa-preview" class="italic leading-relaxed"></p>
+            </div>
+            <div class="space-y-2">
+                <a id="finish-wa-link" href="#" target="_blank" onclick="closeModal('modal-finish-whatsapp')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-base"></i> දැන්ම WhatsApp පණිවිඩය යවන්න
+                </a>
+                <button onclick="closeModal('modal-finish-whatsapp')" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl text-xs font-semibold">
+                    පසුව යවන්න (Close)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-customer" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-3.5 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-pinktheme-100 pb-2.5">
+                <h3 class="font-bold text-pinktheme-800 text-sm">පාරිභෝගික විස්තර (Customer Profile)</h3>
+                <button onclick="closeModal('modal-customer')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">නම (Full Name) *</label>
+                    <input type="text" id="cust-name" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">දුරකථන අංකය (Phone) *</label>
+                    <input type="tel" id="cust-phone" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">විශේෂ සටහන් / මිනුම් විස්තර</label>
+                    <textarea id="cust-notes" rows="2" placeholder="උදා: උරහිස 14, පපුව 34, ඉණ 28..." class="w-full border border-pinktheme-200 rounded-xl px-3 py-2"></textarea>
+                </div>
+                <div class="border border-dashed border-pinktheme-300 rounded-xl p-3 text-center bg-pinktheme-50/40">
+                    <p class="font-semibold text-pinktheme-800 mb-1">සාමාන්‍ය මිනුම් පොතේ ෆොටෝ එක</p>
+                    <img id="preview-cust-meas" class="hidden w-full h-28 object-cover rounded-lg mb-2">
+                    <label class="inline-block bg-white border border-pinktheme-200 text-pinktheme-600 px-3 py-1.5 rounded-lg cursor-pointer font-semibold">
+                        <i class="fa-solid fa-camera mr-1"></i> පොතේ ෆොටෝ එකක් දාන්න
+                        <input type="file" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-cust-meas', 'tempCustMeasImg')">
+                    </label>
+                </div>
+            </div>
+            <button onclick="saveCustomer()" class="w-full bg-pinktheme-600 text-white py-2.5 rounded-xl text-xs font-bold shadow">සුරකින්න (Save Customer)</button>
+        </div>
+    </div>
+
+    <div id="modal-gallery" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-3.5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-pinktheme-100 pb-2.5">
+                <h3 class="font-bold text-pinktheme-800 text-sm">අලුත් ඇඳුමක ෆොටෝ එකක්</h3>
+                <button onclick="closeModal('modal-gallery')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="border border-dashed border-pinktheme-300 rounded-xl p-3 text-center bg-pinktheme-50/40">
+                    <img id="preview-gal-img" class="hidden w-full h-36 object-cover rounded-lg mb-2">
+                    <label class="inline-block bg-pinktheme-600 text-white px-4 py-2 rounded-xl cursor-pointer font-semibold">
+                        <i class="fa-solid fa-camera mr-1"></i> ෆොටෝ එක තෝරන්න *
+                        <input type="file" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-gal-img', 'tempGalImg')">
+                    </label>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">ඇඳුමේ නම / විස්තරය *</label>
+                    <input type="text" id="gal-title" placeholder="උදා: බාලිකා පාසල් නිල ඇඳුම" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">වර්ගය (Category)</label>
+                    <select id="gal-category" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2"></select>
+                </div>
+            </div>
+            <button onclick="saveGalleryItem()" class="w-full bg-pinktheme-600 text-white py-2.5 rounded-xl text-xs font-bold shadow">Gallery එකට දාන්න</button>
+        </div>
+    </div>
+
+    <div id="modal-stock" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-3.5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-pinktheme-100 pb-2.5">
+                <h3 class="font-bold text-pinktheme-800 text-sm">රෙදි / උපකරණ තොග (Add Stock)</h3>
+                <button onclick="closeModal('modal-stock')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">රෙදි වර්ගය / ද්‍රව්‍යයේ නම *</label>
+                    <input type="text" id="stock-name" placeholder="උදා: පාසල් නිල ඇඳුම් සුදු රෙදි / දහම් පාසල් රෙදි" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">අදාළ ඇඳුම් වර්ගය (Category)</label>
+                    <select id="stock-category" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">දැනට ඇති ප්‍රමාණය *</label>
+                        <input type="number" step="0.5" id="stock-qty" placeholder="5" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">ඒකකය (Unit)</label>
+                        <select id="stock-unit" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                            <option value="මීටර් (m)">මීටර් (m)</option>
+                            <option value="බෝබින්/රෝල්">බෝබින්/රෝල්</option>
+                            <option value="පැකට්">පැකට්</option>
+                            <option value="කෑලි (pcs)">කෑලි (pcs)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">අවම සීමාව (Alert Limit)</label>
+                    <input type="number" step="0.5" id="stock-min" value="2" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                </div>
+            </div>
+            <button onclick="saveStockItem()" class="w-full bg-pinktheme-600 text-white py-2.5 rounded-xl text-xs font-bold shadow">තොගය සුරකින්න</button>
+        </div>
+    </div>
+
+    <div id="modal-machine" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-3.5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-pinktheme-100 pb-2.5">
+                <h3 class="font-bold text-pinktheme-800 text-sm">මහන මැෂිමක් එකතු කරන්න</h3>
+                <button onclick="closeModal('modal-machine')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">මැෂිමේ නම / වර්ගය *</label>
+                    <input type="text" id="machine-name" placeholder="උදා: Juki High Speed / Singer Overlock" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">තත්ත්වය (Condition)</label>
+                    <select id="machine-status" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                        <option value="හොඳින් වැඩ (Good)">හොඳින් වැඩ (Good)</option>
+                        <option value="සර්විස් කළ යුතුයි (Needs Service)">සර්විස් කළ යුතුයි (Needs Service)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">අවසන් සර්විස් දිනය / සටහන්</label>
+                    <input type="text" id="machine-notes" placeholder="උදා: 2026 නොවැම්බර් ඔයිල් දැම්මා" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                </div>
+            </div>
+            <button onclick="saveMachine()" class="w-full bg-rose-500 text-white py-2.5 rounded-xl text-xs font-bold shadow">සුරකින්න</button>
+        </div>
+    </div>
+
+    <div id="modal-transaction" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-3.5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-pinktheme-100 pb-2.5">
+                <h3 class="font-bold text-pinktheme-800 text-sm">ආදායම් / වියදම් සටහන් කරන්න</h3>
+                <button onclick="closeModal('modal-transaction')" class="text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">වර්ගය (Transaction Type)</label>
+                    <select id="trans-type" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2.5 font-semibold">
+                        <option value="income">🟢 ආදායමක් (Tailoring Income)</option>
+                        <option value="shop_expense">🔴 ව්‍යාපාරයේ වියදමක් (නූල්, රෙදි, මැෂින්)</option>
+                        <option value="home_expense">🟠 ගෙදර වියදමට ගත් මුදලක් (Home Expense)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">විස්තරය (Description) *</label>
+                    <input type="text" id="trans-desc" placeholder="උදා: නූල් සහ බොත්තම් / ගෙදර බඩු වලට" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">මුදල (Amount Rs.) *</label>
+                        <input type="number" id="trans-amount" placeholder="1000" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">දිනය (Date)</label>
+                        <input type="date" id="trans-date" class="w-full border border-pinktheme-200 rounded-xl px-3 py-2">
+                    </div>
+                </div>
+            </div>
+            <button onclick="saveTransaction()" class="w-full bg-pinktheme-600 text-white py-2.5 rounded-xl text-xs font-bold shadow">සටහන් කරන්න (Save)</button>
+        </div>
+    </div>
+
+    <div id="modal-image-viewer" class="hidden fixed inset-0 bg-black/85 z-50 flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-md flex justify-between items-center text-white mb-3">
+            <h4 id="viewer-title" class="text-sm font-bold">Image Preview</h4>
+            <button onclick="closeModal('modal-image-viewer')" class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <img id="viewer-img" src="" class="max-w-full max-h-[75vh] rounded-2xl object-contain border border-white/20">
+    </div>
+
+    <div id="toast" class="hidden fixed top-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-xl z-50 flex items-center gap-2 transition">
+        <i class="fa-solid fa-circle-check text-pinktheme-400"></i>
+        <span id="toast-msg">Saved!</span>
+    </div>
+
+    <div class="hidden">
+        <div id="pdf-export-template" class="p-6 bg-white text-slate-800" style="width: 750px;">
+            <div style="border: 2px solid #f43f6e; border-radius: 16px; padding: 24px;">
+                <div style="text-align: center; border-bottom: 2px solid #ffe4ec; padding-bottom: 16px; margin-bottom: 16px;">
+                    <h1 style="font-size: 24px; font-weight: bold; color: #be1245; margin: 0;">Prashansa Tailors</h1>
+                    <p style="font-size: 13px; color: #64748b; margin: 4px 0;">මාසික ආදායම් සහ වියදම් සමාලෝචන වාර්තාව (Monthly Financial Summary)</p>
+                    <p id="pdf-meta" style="font-size: 11px; color: #94a3b8; margin: 0;"></p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; font-size: 13px;">
+                    <div style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
+                        <div style="color: #64748b;">මුළු ආදායම (Total Income):</div>
+                        <div style="font-size: 18px; font-weight: bold; color: #059669;">Rs. <span id="pdf-inc">0</span></div>
+                    </div>
+                    <div style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
+                        <div style="color: #64748b;">ව්‍යාපාරයේ වියදම් (Business Expenses):</div>
+                        <div style="font-size: 18px; font-weight: bold; color: #e11d48;">Rs. <span id="pdf-shop">0</span></div>
+                    </div>
+                    <div style="padding: 12px; background: #fff1f5; border: 1px solid #fecdd9; border-radius: 10px;">
+                        <div style="color: #881337;">ශුද්ධ ව්‍යාපාර ලාභය (Net Profit):</div>
+                        <div style="font-size: 18px; font-weight: bold; color: #be1245;">Rs. <span id="pdf-prof">0</span></div>
+                    </div>
+                    <div style="padding: 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;">
+                        <div style="color: #92400e;">ගෙදර වියදමට ගත් මුදල (Home Expenses):</div>
+                        <div style="font-size: 18px; font-weight: bold; color: #d97706;">Rs. <span id="pdf-home">0</span></div>
+                    </div>
+                </div>
+
+                <div style="padding: 12px; background: #e11d55; color: white; border-radius: 10px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 20px;">
+                    අතේ ඉතිරි ශුද්ධ මුදල (Remaining Cash in Hand): Rs. <span id="pdf-rem">0</span>
+                </div>
+
+                <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #334155;">ගනුදෙනු විස්තර (Transactions List)</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                    <thead>
+                        <tr style="background: #ffe4ec; color: #881337;">
+                            <th style="padding: 8px; border: 1px solid #fecdd9; text-align: left;">දිනය (Date)</th>
+                            <th style="padding: 8px; border: 1px solid #fecdd9; text-align: left;">විස්තරය (Description)</th>
+                            <th style="padding: 8px; border: 1px solid #fecdd9; text-align: left;">වර්ගය (Type)</th>
+                            <th style="padding: 8px; border: 1px solid #fecdd9; text-align: right;">මුදල (Rs.)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pdf-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DRESS_CATEGORIES = [
+            "පාසල් නිල ඇඳුම් - ගැහැණු (School Uniforms - Girls)",
+            "පාසල් නිල ඇඳුම් - පිරිමි (School Uniforms - Boys)",
+            "දහම් පාසල් නිල ඇඳුම් (Dhamma School Uniforms - Lama Sari / White)",
+            "කාන්තා නයිට් ඩ්‍රෙස් / නයිටි (Women Night Dress / Nighty)",
+            "ළදරු / බබාලගේ නයිට් ඩ්‍රෙස් (Baby Night Dress)",
+            "ළමා රාත්‍රී ඇඳුම් (Kids Night Dress - Girls & Boys)",
+            "රාත්‍රී ඇඳුම් / නයිට්වෙයාර් (General Night Dress / Nightwear)",
+            "සාරි හැට්ට (Saree Blouses / Jacket)",
+            "සාරි වැඩ දැමීම / මැසීම (Saree Work / Draping / Fall & Pico)",
+            "ඔසරි / කැන්ඩියන් (Osariya / Kandyan)",
+            "ගවුම් (Frocks & Casual Dresses)",
+            "උත්සව ගවුම් (Party / Bridal / Flower Girl Frocks)",
+            "සාය සහ බ්ලවුස් (Skirts & Blouses)",
+            "ළමා ඇඳුම් (Kids Wear)",
+            "පිරිමි කමිස සහ කලිසම් (Gents Shirts & Trousers)",
+            "ගෘහස්ථ රෙදිපිළි / කර්ටන් (Curtains & Cushion Covers)",
+            "ඇඳුම් අලුත්වැඩියා (Alterations & Repairs)",
+            "වෙනත් (Other)"
+        ];
+
+        const STORAGE_KEY = 'prashansa_tailors_v2';
+
+        const DEFAULT_DATA = {
+            owner: {
+                name: "Prashansa / අම්මා",
+                photo: "https://placehold.co/150x150/ffe4ec/e11d55?text=Amma"
+            },
+            customers: [
+                {
+                    id: "c1",
+                    name: "නයනා කුමාරි (Nayana)",
+                    phone: "0771234567",
+                    notes: "පාසල් ගවුම් සහ සාරි හැට්ට නිතර මහනවා. උරහිස 14, පපුව 35.",
+                    measImg: ""
+                },
+                {
+                    id: "c2",
+                    name: "කුමාරි පෙරේරා (Kumari)",
+                    phone: "0719876543",
+                    notes: "දහම් පාසල් සහ කාන්තා නයිට් ඩ්‍රෙස් මහනවා.",
+                    measImg: ""
+                }
+            ],
+            orders: [
+                {
+                    id: "o1",
+                    customerId: "c1",
+                    customerName: "නයනා කුමාරි (Nayana)",
+                    customerPhone: "0771234567",
+                    category: "පාසල් නිල ඇඳුම් - ගැහැණු (School Uniforms - Girls)",
+                    detail: "පාසල් ගවුම් 2ක්",
+                    dueDate: getOffsetDate(1),
+                    fabricSource: "customer",
+                    totalAmount: 2400,
+                    advanceAmount: 0,
+                    notes: "කර ටිකක් පළල් කරන්න, සාක්කුවක් දාන්න.",
+                    measImg: "",
+                    designImg: "",
+                    status: "pending",
+                    createdAt: getOffsetDate(-2)
+                },
+                {
+                    id: "o2",
+                    customerId: "c2",
+                    customerName: "කුමාරි පෙරේරා (Kumari)",
+                    customerPhone: "0719876543",
+                    category: "කාන්තා නයිට් ඩ්‍රෙස් / නයිටි (Women Night Dress / Nighty)",
+                    detail: "කපු නයිට් ඩ්‍රෙස් 1ක්",
+                    dueDate: getOffsetDate(2),
+                    fabricSource: "shop",
+                    totalAmount: 2200,
+                    advanceAmount: 1000,
+                    notes: "ඉදිරිපස බොත්තම් 4ක්, සාක්කුවක් තියන්න.",
+                    measImg: "",
+                    designImg: "",
+                    status: "pending",
+                    createdAt: getOffsetDate(-1)
+                }
+            ],
+            gallery: [
+                {
+                    id: "g1",
+                    title: "බාලිකා පාසල් නිල ඇඳුම (Girls School Uniform)",
+                    category: "පාසල් නිල ඇඳුම් - ගැහැණු (School Uniforms - Girls)",
+                    img: "https://placehold.co/400x400/ffe4ec/e11d55?text=Girls+School+Uniform"
+                },
+                {
+                    id: "g2",
+                    title: "දහම් පාසල් සුදු ඇඳුම (Dhamma School Dress)",
+                    category: "දහම් පාසල් නිල ඇඳුම් (Dhamma School Uniforms - Lama Sari / White)",
+                    img: "https://placehold.co/400x400/fff1f5/be1245?text=Dhamma+School+Dress"
+                },
+                {
+                    id: "g3",
+                    title: "මනාලියන්ගේ සාරි හැට්ටය (Bridal Blouse)",
+                    category: "සාරි හැට්ට (Saree Blouses / Jacket)",
+                    img: "https://placehold.co/400x400/fecdd9/e11d55?text=Bridal+Saree+Blouse"
+                },
+                {
+                    id: "g4",
+                    title: "කාන්තා කපු නයිටි / නයිට් ඩ්‍රෙස් (Ladies Nighty)",
+                    category: "කාන්තා නයිට් ඩ්‍රෙස් / නයිටි (Women Night Dress / Nighty)",
+                    img: "https://placehold.co/400x400/fff1f5/e11d55?text=Ladies+Night+Dress"
+                },
+                {
+                    id: "g5",
+                    title: "බබාලගේ මෘදු නයිට් ඩ්‍රෙස් (Baby Night Dress)",
+                    category: "ළදරු / බබාලගේ නයිට් ඩ්‍රෙස් (Baby Night Dress)",
+                    img: "https://placehold.co/400x400/ffe4ec/f43f6e?text=Baby+Night+Dress"
+                }
+            ],
+            stock: [
+                { id: "s1", name: "පාසල් නිල ඇඳුම් සුදු රෙදි (School White)", category: "පාසල් නිල ඇඳුම් - ගැහැණු (School Uniforms - Girls)", qty: 2, unit: "මීටර් (m)", min: 4 },
+                { id: "s2", name: "දහම් පාසල් සුදු පොප්ලින් රෙදි", category: "දහම් පාසල් නිල ඇඳුම් (Dhamma School Uniforms - Lama Sari / White)", qty: 8, unit: "මීටර් (m)", min: 3 },
+                { id: "s3", name: "පාසල් නිල් කලිසම් රෙදි (Navy Blue)", category: "පාසල් නිල ඇඳුම් - පිරිමි (School Uniforms - Boys)", qty: 1.5, unit: "මීටර් (m)", min: 3 },
+                { id: "s4", name: "කාන්තා නයිටි සඳහා මල් කපු රෙදි (Floral Cotton)", category: "කාන්තා නයිට් ඩ්‍රෙස් / නයිටි (Women Night Dress / Nighty)", qty: 6, unit: "මීටර් (m)", min: 3 },
+                { id: "s5", name: "බබාලගේ නයිට් ඩ්‍රෙස් මෘදු රෙදි (Soft Baby Fabric)", category: "ළදරු / බබාලගේ නයිට් ඩ්‍රෙස් (Baby Night Dress)", qty: 1.5, unit: "මීටර් (m)", min: 2 }
+            ],
+            machines: [
+                { id: "m1", name: "Juki High Speed Single Needle", status: "හොඳින් වැඩ (Good)", notes: "සුමටව වැඩ කරයි" },
+                { id: "m2", name: "Singer Overlock Machine", status: "සර්විස් කළ යුතුයි (Needs Service)", notes: "නූල් කැඩෙනවා - සර්විස් කරන්න" }
+            ],
+            transactions: [
+                { id: "t1", type: "income", desc: "කාන්තා නයිට් ඩ්‍රෙස් Advance", amount: 1000, date: getCurrentMonthDate(1) },
+                { id: "t2", type: "shop_expense", desc: "සුදු නූල් සහ බොත්තම්", amount: 450, date: getCurrentMonthDate(2) },
+                { id: "t3", type: "home_expense", desc: "ගෙදර එළවළු සහ බඩු වලට", amount: 850, date: getCurrentMonthDate(3) }
+            ]
+        };
+
+        let appData = loadData();
+        let currentOrderFilter = 'pending';
+        let currentGalleryCategory = 'All';
+        let showOnlyDebtCustomers = false;
+        let tempUploads = {
+            ownerPhotoBase64: "",
+            tempMeasImg: "",
+            tempDesignImg: "",
+            tempCustMeasImg: "",
+            tempGalImg: ""
+        };
+
+        function getOffsetDate(days) {
+            const d = new Date();
+            d.setDate(d.getDate() + days);
+            return d.toISOString().split('T')[0];
+        }
+
+        function getCurrentMonthDate(dayNum) {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(Math.min(dayNum, 28)).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        function getCurrentMonthStr() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function formatPhoneForWA(phone) {
+            let clean = (phone || "").replace(/\D/g, '');
+            if (clean.startsWith('0')) {
+                clean = '94' + clean.substring(1);
+            } else if (clean.length === 9) {
+                clean = '94' + clean;
+            }
+            return clean;
+        }
+
+        function loadData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
+                    return JSON.parse(JSON.stringify(DEFAULT_DATA));
+                }
+                const parsed = JSON.parse(raw);
+                return {
+                    owner: parsed.owner || DEFAULT_DATA.owner,
+                    customers: parsed.customers || [],
+                    orders: parsed.orders || [],
+                    gallery: parsed.gallery || [],
+                    stock: parsed.stock || [],
+                    machines: parsed.machines || [],
+                    transactions: parsed.transactions || []
+                };
+            } catch (e) {
+                console.error("Storage load error:", e);
+                return JSON.parse(JSON.stringify(DEFAULT_DATA));
+            }
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            } catch (e) {
+                showToast("Storage full! ෆොටෝ ප්‍රමාණය අඩු කරන්න.");
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2600);
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function populateCategoryDropdowns() {
+            const orderCatSelect = document.getElementById('order-dress-category');
+            const galCatSelect = document.getElementById('gal-category');
+            const stockCatSelect = document.getElementById('stock-category');
+
+            const optionsHTML = DRESS_CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            orderCatSelect.innerHTML = optionsHTML;
+            galCatSelect.innerHTML = optionsHTML;
+            stockCatSelect.innerHTML = optionsHTML;
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('nav-active', 'text-pinktheme-600');
+                btn.classList.add('text-slate-400');
+            });
+            const activeNav = document.getElementById(`nav-${tabName}`);
+            if (activeNav) {
+                activeNav.classList.remove('text-slate-400');
+                activeNav.classList.add('nav-active');
+            }
+
+            const subHeader = document.getElementById('sub-header');
+            const titles = {
+                home: ["Prashansa Tailors", "මුල් පිටුව"],
+                orders: ["ඇණවුම් කළමනාකරණය", "Orders & Finish Tick"],
+                customers: ["පාරිභෝගිකයින් සහ හිඟ මුදල්", "Customer Profiles & Credit"],
+                gallery: ["මහපු ඇඳුම් එකතුව", "Portfolio Gallery"],
+                inventory: ["රෙදි තොග සහ මැෂින්", "Stock & Machines"],
+                finance: ["ආදායම් / වියදම් / PDF", "Finance & Monthly Summary"]
+            };
+
+            if (tabName === 'home') {
+                subHeader.classList.add('hidden');
+                renderHome();
+            } else {
+                subHeader.classList.remove('hidden');
+                document.getElementById('sub-header-title').innerText = titles[tabName][0];
+                document.getElementById('sub-header-subtitle').innerText = titles[tabName][1];
+            }
+
+            if (tabName === 'orders') renderOrders();
+            if (tabName === 'customers') renderCustomers();
+            if (tabName === 'gallery') renderGallery();
+            if (tabName === 'inventory') renderInventory();
+            if (tabName === 'finance') renderFinance();
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function previewImage(input, previewId, tempKey) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 650;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > h && w > maxDim) {
+                        h = Math.round((h * maxDim) / w);
+                        w = maxDim;
+                    } else if (h > maxDim) {
+                        w = Math.round((w * maxDim) / h);
+                        h = maxDim;
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const compressed = canvas.toDataURL('image/jpeg', 0.72);
+                    tempUploads[tempKey] = compressed;
+
+                    const previewEl = document.getElementById(previewId);
+                    previewEl.src = compressed;
+                    previewEl.classList.remove('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function viewFullImage(src, title) {
+            const imgEl = document.getElementById('viewer-img');
+            imgEl.onerror = function() {
+                this.onerror = null;
+                this.src = 'https://placehold.co/600x600/ffe4ec/be1245?text=Prashansa+Tailors';
+            };
+            imgEl.src = src;
+            document.getElementById('viewer-title').innerText = title || 'Photo';
+            openModal('modal-image-viewer');
+        }
+
+        function toggleShowcaseStrip() {
+            const body = document.getElementById('showcase-strip-body');
+            const btn = document.getElementById('showcase-toggle-btn');
+            const isHidden = body.classList.toggle('hidden');
+            btn.innerText = isHidden ? 'පෙන්වන්න' : 'සඟවන්න';
+        }
+
+        function getCustomerDueAmount(customerId, customerPhone) {
+            return appData.orders
+                .filter(o => (o.customerId && o.customerId === customerId) || (o.customerPhone && o.customerPhone === customerPhone))
+                .reduce((sum, o) => {
+                    const bal = Math.max(0, (Number(o.totalAmount) || 0) - (Number(o.advanceAmount) || 0));
+                    return sum + bal;
+                }, 0);
+        }
+
+        function getCustomerOrderCounts(customerId, customerPhone) {
+            const matched = appData.orders.filter(o =>
+                (o.customerId && o.customerId === customerId) ||
+                (o.customerPhone && o.customerPhone === customerPhone)
+            );
+            const total = matched.length;
+            const pending = matched.filter(o => o.status !== 'completed').length;
+            const completed = matched.filter(o => o.status === 'completed').length;
+            return { total, pending, completed };
+        }
+
+        function renderHome() {
+            document.getElementById('owner-avatar').src = appData.owner.photo || DEFAULT_DATA.owner.photo;
+            document.getElementById('owner-name-display').innerText = appData.owner.name || DEFAULT_DATA.owner.name;
+
+            const pendingOrders = appData.orders.filter(o => o.status !== 'completed');
+            document.getElementById('home-pending-count').innerText = pendingOrders.length;
+
+            const totalDue = appData.orders.reduce((sum, o) => {
+                return sum + Math.max(0, (Number(o.totalAmount) || 0) - (Number(o.advanceAmount) || 0));
+            }, 0);
+            document.getElementById('home-total-due').innerText = totalDue.toLocaleString();
+
+            const curMonth = getCurrentMonthStr();
+            const monthIncome = appData.transactions
+                .filter(t => t.type === 'income' && (t.date || '').startsWith(curMonth))
+                .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+            document.getElementById('home-month-income').innerText = monthIncome.toLocaleString();
+
+            const reminderContainer = document.getElementById('home-reminders-list');
+            const todayStr = getOffsetDate(0);
+            const in3DaysStr = getOffsetDate(3);
+
+            const upcoming = pendingOrders
+                .filter(o => o.dueDate <= in3DaysStr)
+                .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+
+            if (upcoming.length === 0) {
+                reminderContainer.innerHTML = `
+                    <div class="text-xs text-slate-500 bg-pinktheme-50/70 rounded-xl p-2.5 flex items-center gap-2">
+                        <i class="fa-solid fa-mug-hot text-pinktheme-500"></i>
+                        <span>ඉදිරි දින 3 ඇතුළත හදිසි භාරදීම් නැත. සුවසේ වැඩ කරන්න!</span>
+                    </div>`;
+            } else {
+                reminderContainer.innerHTML = upcoming.slice(0, 3).map(o => {
+                    let badge = `<span class="bg-pinktheme-100 text-pinktheme-700 text-[10px] font-bold px-2 py-0.5 rounded-full">${o.dueDate}</span>`;
+                    if (o.dueDate < todayStr) {
+                        badge = `<span class="bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-full">දිනය පසුවූ (${o.dueDate})</span>`;
+                    } else if (o.dueDate === todayStr) {
+                        badge = `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">අද දින!</span>`;
+                    }
+                    return `
+                        <div class="flex items-center justify-between bg-pinktheme-50/60 hover:bg-pinktheme-100/50 px-3 py-2 rounded-xl border border-pinktheme-100">
+                            <div class="min-w-0 pr-2">
+                                <p class="text-xs font-bold text-slate-800 truncate">${o.customerName}</p>
+                                <p class="text-[11px] text-slate-500 truncate">${o.category}</p>
+                            </div>
+                            ${badge}
+                        </div>`;
+                }).join('');
+            }
+
+            const creditBox = document.getElementById('home-credit-box');
+            const creditList = document.getElementById('home-credit-list');
+            const debtorOrders = appData.orders.filter(o => ((Number(o.totalAmount) || 0) - (Number(o.advanceAmount) || 0)) > 0);
+
+            if (debtorOrders.length > 0) {
+                creditBox.classList.remove('hidden');
+                creditList.innerHTML = debtorOrders.slice(0, 3).map(o => {
+                    const due = (Number(o.totalAmount) || 0) - (Number(o.advanceAmount) || 0);
+                    return `
+                        <div class="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-rose-100">
+                            <div>
+                                <p class="text-xs font-bold text-slate-800">${o.customerName}</p>
+                                <p class="text-[10px] text-slate-500">${o.detail || o.category}</p>
+                            </div>
+                            <span class="text-xs font-bold text-rose-600">Rs. ${due.toLocaleString()}</span>
+                        </div>`;
+                }).join('');
+            } else {
+                creditBox.classList.add('hidden');
+            }
+
+            const lowStock = appData.stock.filter(s => Number(s.qty) <= Number(s.min));
+            const stockAlert = document.getElementById('home-stock-alert');
+            const navDot = document.getElementById('nav-stock-dot');
+            if (lowStock.length > 0) {
+                stockAlert.classList.remove('hidden');
+                navDot.classList.remove('hidden');
+                document.getElementById('home-stock-alert-text').innerText =
+                    lowStock.map(s => `${s.name} (${s.qty} ${s.unit})`).join(', ');
+            } else {
+                stockAlert.classList.add('hidden');
+                navDot.classList.add('hidden');
+            }
+        }
+
+        function openOwnerModal() {
+            tempUploads.ownerPhotoBase64 = "";
+            document.getElementById('edit-owner-name').value = appData.owner.name || "";
+            document.getElementById('edit-owner-preview').src = appData.owner.photo || DEFAULT_DATA.owner.photo;
+            openModal('modal-owner');
+        }
+
+        function saveOwnerProfile() {
+            const nameVal = document.getElementById('edit-owner-name').value.trim();
+            if (nameVal) appData.owner.name = nameVal;
+            if (tempUploads.ownerPhotoBase64) appData.owner.photo = tempUploads.ownerPhotoBase64;
+            saveData();
+            renderHome();
+            closeModal('modal-owner');
+            showToast("අම්මාගේ විස්තර සුරකින ලදී!");
+        }
+
+        function exportBackupJSON() {
+            const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Prashansa_Tailors_Backup_${getOffsetDate(0)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("Backup ගොනුව Download විය!");
+        }
+
+        function importBackupJSON(input) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported && Array.isArray(imported.orders)) {
+                        appData = imported;
+                        saveData();
+                        renderHome();
+                        closeModal('modal-owner');
+                        showToast("දත්ත සාර්ථකව Restore කරන ලදී!");
+                    } else {
+                        showToast("වලංගු Backup ගොනුවක් නොවේ!");
+                    }
+                } catch (err) {
+                    showToast("ගොනුව කියවීමට නොහැකි විය.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function filterOrders(type) {
+            currentOrderFilter = type;
+            ['pending', 'completed', 'unpaid'].forEach(t => {
+                const btn = document.getElementById(`btn-filter-${t}`);
+                if (t === type) {
+                    btn.className = "py-2 text-[11px] font-bold rounded-lg bg-white text-pinktheme-700 shadow-sm transition";
+                } else {
+                    btn.className = "py-2 text-[11px] font-semibold rounded-lg text-slate-600 transition";
+                }
+            });
+            renderOrders();
+        }
+
+        function openOrderModal(orderId = null) {
+            tempUploads.tempMeasImg = "";
+            tempUploads.tempDesignImg = "";
+            document.getElementById('preview-meas-img').classList.add('hidden');
+            document.getElementById('preview-design-img').classList.add('hidden');
+
+            const custSelect = document.getElementById('order-customer-select');
+            custSelect.innerHTML = `<option value="">-- අලුත් පාරිභෝගිකයෙක් (New Customer) --</option>` +
+                appData.customers.map(c => `<option value="${c.id}">${c.name} (${c.phone})</option>`).join('');
+
+            if (orderId) {
+                const o = appData.orders.find(item => item.id === orderId);
+                if (!o) return;
+                document.getElementById('order-modal-title').innerText = "ඇණවුම සංස්කරණය (Edit Order)";
+                document.getElementById('order-id').value = o.id;
+                document.getElementById('order-customer-select').value = o.customerId || "";
+                document.getElementById('order-cust-name').value = o.customerName;
+                document.getElementById('order-cust-phone').value = o.customerPhone;
+                document.getElementById('order-dress-category').value = o.category || DRESS_CATEGORIES[0];
+                document.getElementById('order-dress-detail').value = o.detail || "";
+                document.getElementById('order-due-date').value = o.dueDate;
+
+                const radios = document.getElementsByName('fabricSource');
+                radios.forEach(r => { r.checked = (r.value === o.fabricSource); });
+                toggleAdvanceField();
+
+                document.getElementById('order-total').value = o.totalAmount;
+                document.getElementById('order-advance').value = o.advanceAmount;
+                document.getElementById('order-notes').value = o.notes || "";
+
+                if (o.measImg) {
+                    document.getElementById('preview-meas-img').src = o.measImg;
+                    document.getElementById('preview-meas-img').classList.remove('hidden');
+                }
+                if (o.designImg) {
+                    document.getElementById('preview-design-img').src = o.designImg;
+                    document.getElementById('preview-design-img').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('order-modal-title').innerText = "අලුත් ඇණවුමක් (New Order)";
+                document.getElementById('order-id').value = "";
+                document.getElementById('order-customer-select').value = "";
+                document.getElementById('order-cust-name').value = "";
+                document.getElementById('order-cust-phone').value = "";
+                document.getElementById('order-dress-category').selectedIndex = 0;
+                document.getElementById('order-dress-detail').value = "";
+                document.getElementById('order-due-date').value = getOffsetDate(5);
+                document.getElementsByName('fabricSource')[0].checked = true;
+                toggleAdvanceField();
+                document.getElementById('order-total').value = "";
+                document.getElementById('order-advance').value = "0";
+                document.getElementById('order-notes').value = "";
+            }
+
+            calcOrderBalance();
+            openModal('modal-order');
+        }
+
+        function fillCustomerFromSelect() {
+            const custId = document.getElementById('order-customer-select').value;
+            if (!custId) return;
+            const c = appData.customers.find(item => item.id === custId);
+            if (c) {
+                document.getElementById('order-cust-name').value = c.name;
+                document.getElementById('order-cust-phone').value = c.phone;
+                if (c.measImg) {
+                    tempUploads.tempMeasImg = c.measImg;
+                    const p = document.getElementById('preview-meas-img');
+                    p.src = c.measImg;
+                    p.classList.remove('hidden');
+                }
+            }
+        }
+
+        function toggleAdvanceField() {
+            const source = document.querySelector('input[name="fabricSource"]:checked').value;
+            const advInput = document.getElementById('order-advance');
+            const advLabel = document.getElementById('advance-label');
+            if (source === 'customer') {
+                advInput.value = 0;
+                advLabel.innerText = "අත්තිකාරම් (Customer Fabric = 0)";
+            } else {
+                advLabel.innerText = "අත්තිකාරම් (Advance Rs.)";
+            }
+            calcOrderBalance();
+        }
+
+        function calcOrderBalance() {
+            const total = Number(document.getElementById('order-total').value) || 0;
+            const adv = Number(document.getElementById('order-advance').value) || 0;
+            const bal = Math.max(0, total - adv);
+            document.getElementById('order-balance-preview').innerText = bal.toLocaleString();
+        }
+
+        function saveOrder() {
+            const name = document.getElementById('order-cust-name').value.trim();
+            const phone = document.getElementById('order-cust-phone').value.trim();
+            const category = document.getElementById('order-dress-category').value;
+            const detail = document.getElementById('order-dress-detail').value.trim();
+            const dueDate = document.getElementById('order-due-date').value;
+            const fabricSource = document.querySelector('input[name="fabricSource"]:checked').value;
+            const totalAmount = Number(document.getElementById('order-total').value) || 0;
+            const advanceAmount = fabricSource === 'customer' ? 0 : (Number(document.getElementById('order-advance').value) || 0);
+            const notes = document.getElementById('order-notes').value.trim();
+            const existingId = document.getElementById('order-id').value;
+
+            if (!name || !phone || !dueDate) {
+                showToast("කරුණාකර නම, දුරකථන අංකය සහ දිනය ඇතුළත් කරන්න!");
+                return;
+            }
+
+            let customerId = document.getElementById('order-customer-select').value;
+            if (!customerId) {
+                const existingCust = appData.customers.find(c => c.phone === phone);
+                if (existingCust) {
+                    customerId = existingCust.id;
+                } else {
+                    customerId = "c_" + Date.now();
+                    appData.customers.unshift({
+                        id: customerId,
+                        name,
+                        phone,
+                        notes,
+                        measImg: tempUploads.tempMeasImg || ""
+                    });
+                }
+            }
+
+            if (existingId) {
+                const idx = appData.orders.findIndex(o => o.id === existingId);
+                if (idx !== -1) {
+                    const prev = appData.orders[idx];
+                    appData.orders[idx] = {
+                        ...prev,
+                        customerId,
+                        customerName: name,
+                        customerPhone: phone,
+                        category,
+                        detail,
+                        dueDate,
+                        fabricSource,
+                        totalAmount,
+                        advanceAmount,
+                        notes,
+                        measImg: tempUploads.tempMeasImg || prev.measImg || "",
+                        designImg: tempUploads.tempDesignImg || prev.designImg || ""
+                    };
+                }
+            } else {
+                appData.orders.unshift({
+                    id: "o_" + Date.now(),
+                    customerId,
+                    customerName: name,
+                    customerPhone: phone,
+                    category,
+                    detail,
+                    dueDate,
+                    fabricSource,
+                    totalAmount,
+                    advanceAmount,
+                    notes,
+                    measImg: tempUploads.tempMeasImg || "",
+                    designImg: tempUploads.tempDesignImg || "",
+                    status: "pending",
+                    createdAt: getOffsetDate(0)
+                });
+
+                if (advanceAmount > 0) {
+                    appData.transactions.unshift({
+                        id: "t_" + Date.now(),
+                        type: "income",
+                        desc: `Advance - ${name} (${detail || category})`,
+                        amount: advanceAmount,
+                        date: getOffsetDate(0)
+                    });
+                }
+            }
+
+            saveData();
+            closeModal('modal-order');
+            renderOrders();
+            renderHome();
+            showToast("ඇණවුම සාර්ථකව සුරකින ලදී!");
+        }
+
+        function finishOrderAndPromptWA(orderId) {
+            const idx = appData.orders.findIndex(o => o.id === orderId);
+            if (idx === -1) return;
+            const order = appData.orders[idx];
+            order.status = 'completed';
+
+            const balanceDue = Math.max(0, (Number(order.totalAmount) || 0) - (Number(order.advanceAmount) || 0));
+            saveData();
+            renderOrders();
+            renderHome();
+
+            const waNum = formatPhoneForWA(order.customerPhone);
+            const itemDesc = order.detail ? `${order.detail} (${order.category})` : order.category;
+            let msg = `ආයුබෝවන් ${order.customerName}, Prashansa Tailors වෙතින්. ඔබගේ ${itemDesc} ඇඳුම මහලා අවසන් කර ඇත.`;
+            if (balanceDue > 0) {
+                msg += ` ඉතිරි හිඟ මුදල රු. ${balanceDue.toLocaleString()} වේ.`;
+            }
+            msg += ` ස්තූතියි!`;
+
+            document.getElementById('finish-modal-subtitle').innerText = `${order.customerName} - ${itemDesc}`;
+            document.getElementById('finish-wa-preview').innerText = msg;
+            document.getElementById('finish-wa-link').href = `https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`;
+            openModal('modal-finish-whatsapp');
+        }
+
+        function collectBalance(orderId) {
+            const order = appData.orders.find(o => o.id === orderId);
+            if (!order) return;
+            const due = Math.max(0, (Number(order.totalAmount) || 0) - (Number(order.advanceAmount) || 0));
+            if (due <= 0) return;
+
+            order.advanceAmount = order.totalAmount;
+            appData.transactions.unshift({
+                id: "t_" + Date.now(),
+                type: "income",
+                desc: `Balance Paid - ${order.customerName} (${order.detail || order.category})`,
+                amount: due,
+                date: getOffsetDate(0)
+            });
+
+            saveData();
+            renderOrders();
+            renderCustomers();
+            renderHome();
+            showToast(`රු. ${due.toLocaleString()} ආදායමට එකතු විය!`);
+        }
+
+        function deleteOrder(orderId) {
+            appData.orders = appData.orders.filter(o => o.id !== orderId);
+            saveData();
+            renderOrders();
+            renderHome();
+            showToast("ඇණවුම ඉවත් කරන ලදී.");
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('orders-list');
+            let list = [...appData.orders];
+
+            if (currentOrderFilter === 'pending') {
+                list = list.filter(o => o.status !== 'completed');
+            } else if (currentOrderFilter === 'completed') {
+                list = list.filter(o => o.status === 'completed');
+            } else if (currentOrderFilter === 'unpaid') {
+                list = list.filter(o => ((Number(o.totalAmount) || 0) - (Number(o.advanceAmount) || 0)) > 0);
+            }
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="soft-card rounded-2xl p-8 text-center text-xs text-slate-400">
+                        <i class="fa-solid fa-scissors text-2xl text-pinktheme-200 mb-2 block"></i>
+                        මෙම කාණ්ඩයේ ඇණවුම් දැනට නොමැත.
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = list.map(o => {
+                const total = Number(o.totalAmount) || 0;
+                const adv = Number(o.advanceAmount) || 0;
+                const balance = Math.max(0, total - adv);
+                const waNum = formatPhoneForWA(o.customerPhone);
+                const isDone = o.status === 'completed';
+
+                return `
+                    <div class="soft-card rounded-2xl p-4 space-y-3 ${isDone ? 'border-emerald-200 bg-emerald-50/20' : ''}">
+                        <div class="flex justify-between items-start gap-2">
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="font-bold text-sm text-slate-800">${o.customerName}</h4>
+                                    ${isDone
+                                        ? `<span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">මහලා අවසන් ✓</span>`
+                                        : `<span class="bg-pinktheme-100 text-pinktheme-700 text-[10px] font-bold px-2 py-0.5 rounded-full">දින: ${o.dueDate}</span>`
+                                    }
+                                </div>
+                                <p class="text-xs font-semibold text-pinktheme-700 mt-1">${o.category}</p>
+                                ${o.detail ? `<p class="text-[11px] text-slate-600">${o.detail}</p>` : ''}
+                            </div>
+                            <div class="flex gap-1.5">
+                                <button onclick="openOrderModal('${o.id}')" class="w-8 h-8 rounded-lg bg-pinktheme-50 text-pinktheme-600 flex items-center justify-center text-xs"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteOrder('${o.id}')" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center text-xs"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="bg-pinktheme-50/70 rounded-xl p-2.5 flex justify-between items-center text-xs border border-pinktheme-100">
+                            <div>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-pinktheme-700 border border-pinktheme-200">
+                                    ${o.fabricSource === 'shop' ? 'අම්මාගේ රෙදි' : 'කස්ටමර් රෙදි'}
+                                </span>
+                                <span class="text-[11px] text-slate-500 ml-1">මුළු: Rs.${total.toLocaleString()}</span>
+                            </div>
+                            <div class="text-right">
+                                ${balance > 0
+                                    ? `<span class="font-bold text-rose-600">හිඟ: Rs.${balance.toLocaleString()}</span>`
+                                    : `<span class="font-bold text-emerald-600">ගෙවා අවසන් ✓</span>`
+                                }
+                            </div>
+                        </div>
+
+                        ${o.notes ? `<p class="text-[11px] text-slate-600 bg-amber-50/70 border border-amber-100 rounded-xl px-3 py-2"><strong>උපදෙස්:</strong> ${o.notes}</p>` : ''}
+
+                        ${(o.measImg || o.designImg) ? `
+                            <div class="flex gap-2">
+                                ${o.measImg ? `<button onclick="viewFullImage('${o.measImg}', 'මිනුම් පොත - ${o.customerName}')" class="flex-1 py-1.5 px-2.5 bg-pinktheme-50 text-pinktheme-700 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 border border-pinktheme-200"><i class="fa-solid fa-book-open"></i> මිනුම් ෆොටෝ</button>` : ''}
+                                ${o.designImg ? `<button onclick="viewFullImage('${o.designImg}', 'මෝස්තරය - ${o.customerName}')" class="flex-1 py-1.5 px-2.5 bg-fuchsia-50 text-fuchsia-700 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 border border-fuchsia-200"><i class="fa-solid fa-shirt"></i> මෝස්තර ෆොටෝ</button>` : ''}
+                            </div>` : ''}
+
+                        <div class="flex gap-2 pt-1">
+                            ${!isDone
+                                ? `<button onclick="finishOrderAndPromptWA('${o.id}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition">
+                                    <i class="fa-solid fa-check-double"></i> Finish (මහලා අවසන්)
+                                   </button>`
+                                : `<a href="https://wa.me/${waNum}?text=${encodeURIComponent(`ආයුබෝවන් ${o.customerName}, Prashansa Tailors වෙතින්. ඔබගේ ${o.category} ඇඳුම සූදානම්.`)}" target="_blank" class="flex-1 bg-emerald-500 text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5">
+                                    <i class="fa-brands fa-whatsapp"></i> WhatsApp යවන්න
+                                   </a>`
+                            }
+                            ${balance > 0
+                                ? `<button onclick="collectBalance('${o.id}')" class="bg-pinktheme-600 text-white px-3 py-2 rounded-xl text-xs font-bold active:scale-95 transition">
+                                    හිඟය ගත්තා
+                                   </button>`
+                                : ''
+                            }
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function toggleCustomerDebtFilter(onlyDebt) {
+            showOnlyDebtCustomers = onlyDebt;
+            document.getElementById('cust-filter-all').className = !onlyDebt
+                ? "px-3.5 py-1.5 rounded-full text-xs font-bold bg-pinktheme-600 text-white"
+                : "px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white border border-pinktheme-200 text-pinktheme-700";
+            document.getElementById('cust-filter-debt').className = onlyDebt
+                ? "px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-600 text-white"
+                : "px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white border border-rose-200 text-rose-600";
+            renderCustomers();
+        }
+
+        function openCustomerModal() {
+            tempUploads.tempCustMeasImg = "";
+            document.getElementById('cust-name').value = "";
+            document.getElementById('cust-phone').value = "";
+            document.getElementById('cust-notes').value = "";
+            document.getElementById('preview-cust-meas').classList.add('hidden');
+            openModal('modal-customer');
+        }
+
+        function saveCustomer() {
+            const name = document.getElementById('cust-name').value.trim();
+            const phone = document.getElementById('cust-phone').value.trim();
+            const notes = document.getElementById('cust-notes').value.trim();
+
+            if (!name || !phone) {
+                showToast("කරුණාකර නම සහ දුරකථන අංකය ඇතුළත් කරන්න!");
+                return;
+            }
+
+            appData.customers.unshift({
+                id: "c_" + Date.now(),
+                name,
+                phone,
+                notes,
+                measImg: tempUploads.tempCustMeasImg || ""
+            });
+
+            saveData();
+            closeModal('modal-customer');
+            renderCustomers();
+            showToast("පාරිභෝගිකයා සුරකින ලදී!");
+        }
+
+        function renderCustomers() {
+            const query = (document.getElementById('customer-search').value || "").toLowerCase().trim();
+            const container = document.getElementById('customers-list');
+
+            let list = appData.customers.map(c => {
+                const counts = getCustomerOrderCounts(c.id, c.phone);
+                const due = getCustomerDueAmount(c.id, c.phone);
+                return { ...c, counts, due };
+            });
+
+            if (query) {
+                list = list.filter(c => c.name.toLowerCase().includes(query) || c.phone.includes(query));
+            }
+            if (showOnlyDebtCustomers) {
+                list = list.filter(c => c.due > 0);
+            }
+
+            if (list.length === 0) {
+                container.innerHTML = `<div class="soft-card rounded-2xl p-6 text-center text-xs text-slate-400">පාරිභෝගිකයින් හමු නොවීය.</div>`;
+                return;
+            }
+
+            container.innerHTML = list.map(c => {
+                const waNum = formatPhoneForWA(c.phone);
+                const creditMsg = encodeURIComponent(`ආයුබෝවන් ${c.name}, Prashansa Tailors වෙතින්. ඔබගේ ඇඳුම් වෙනුවෙන් ගෙවීමට ඇති හිඟ මුදල රු. ${c.due.toLocaleString()} වේ. ස්තූතියි!`);
+
+                return `
+                    <div class="soft-card rounded-2xl p-4 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">${c.name}</h4>
+                                <p class="text-xs text-pinktheme-600 font-medium"><i class="fa-solid fa-phone mr-1 text-[10px]"></i>${c.phone}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-block bg-pinktheme-100 text-pinktheme-800 text-[10px] font-bold px-2.5 py-1 rounded-full">
+                                    ඇණවුම්: ${c.counts.total} (මහමින්: ${c.counts.pending})
+                                </span>
+                            </div>
+                        </div>
+
+                        ${c.due > 0 ? `
+                            <div class="bg-rose-50 border border-rose-200 rounded-xl p-2.5 flex items-center justify-between">
+                                <span class="text-xs font-bold text-rose-700">ලැබීමට ඇති හිඟ මුදල: Rs. ${c.due.toLocaleString()}</span>
+                                <div class="flex gap-1.5">
+                                    <a href="https://wa.me/${waNum}?text=${creditMsg}" target="_blank" class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1">
+                                        <i class="fa-brands fa-whatsapp"></i> WA
+                                    </a>
+                                    <a href="sms:${c.phone}?body=${creditMsg}" class="bg-blue-600 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1">
+                                        <i class="fa-solid fa-comment-sms"></i> SMS
+                                    </a>
+                                </div>
+                            </div>` : ''}
+
+                        ${c.notes ? `<p class="text-[11px] text-slate-600 bg-pinktheme-50/50 rounded-xl p-2.5">${c.notes}</p>` : ''}
+
+                        <div class="flex gap-2">
+                            <a href="tel:${c.phone}" class="flex-1 py-2 bg-pinktheme-50 text-pinktheme-700 rounded-xl text-xs font-bold text-center">
+                                <i class="fa-solid fa-phone mr-1"></i> Call
+                            </a>
+                            <a href="https://wa.me/${waNum}" target="_blank" class="flex-1 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold text-center">
+                                <i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp
+                            </a>
+                            ${c.measImg ? `<button onclick="viewFullImage('${c.measImg}', 'මිනුම් පොත - ${c.name}')" class="flex-1 py-2 bg-fuchsia-50 text-fuchsia-700 rounded-xl text-xs font-bold text-center">
+                                <i class="fa-solid fa-image mr-1"></i> මිනුම් පොත
+                            </button>` : ''}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function renderGallery() {
+            const pillsContainer = document.getElementById('gallery-category-pills');
+            const cats = ['All', ...DRESS_CATEGORIES];
+
+            pillsContainer.innerHTML = cats.map(cat => {
+                const active = currentGalleryCategory === cat;
+                const shortLabel = cat === 'All' ? 'සියල්ල (All)' : cat.split(' (')[0];
+                return `
+                    <button onclick="setGalleryCategory('${cat.replace(/'/g, "\\'")}')" class="px-3.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition ${active ? 'bg-pinktheme-600 text-white shadow-sm' : 'bg-white text-pinktheme-700 border border-pinktheme-200'}">
+                        ${shortLabel}
+                    </button>`;
+            }).join('');
+
+            const grid = document.getElementById('gallery-grid');
+            const items = currentGalleryCategory === 'All'
+                ? appData.gallery
+                : appData.gallery.filter(g => g.category === currentGalleryCategory);
+
+            if (items.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 soft-card rounded-2xl p-6 text-center text-xs text-slate-400">මෙම වර්ගයේ ෆොටෝ තවම දමා නැත.</div>`;
+                return;
+            }
+
+            grid.innerHTML = items.map(g => `
+                <div class="soft-card rounded-2xl overflow-hidden flex flex-col">
+                    <img src="${g.img}" onclick="viewFullImage('${g.img}', '${g.title}')" class="w-full h-36 object-cover cursor-pointer bg-pinktheme-50">
+                    <div class="p-2.5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold text-pinktheme-500 block truncate">${g.category.split(' (')[0]}</span>
+                            <h4 class="text-xs font-bold text-slate-800 line-clamp-2 mt-0.5">${g.title}</h4>
+                        </div>
+                        <button onclick="deleteGalleryItem('${g.id}')" class="text-[10px] text-rose-500 font-semibold mt-2 self-end">ඉවත් කරන්න</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function setGalleryCategory(cat) {
+            currentGalleryCategory = cat;
+            renderGallery();
+        }
+
+        function openGalleryModal() {
+            tempUploads.tempGalImg = "";
+            document.getElementById('gal-title').value = "";
+            document.getElementById('preview-gal-img').classList.add('hidden');
+            openModal('modal-gallery');
+        }
+
+        function saveGalleryItem() {
+            const title = document.getElementById('gal-title').value.trim();
+            const category = document.getElementById('gal-category').value;
+            if (!title || !tempUploads.tempGalImg) {
+                showToast("කරුණාකර ෆොටෝ එකක් සහ නමක් ඇතුළත් කරන්න!");
+                return;
+            }
+
+            appData.gallery.unshift({
+                id: "g_" + Date.now(),
+                title,
+                category,
+                img: tempUploads.tempGalImg
+            });
+
+            saveData();
+            closeModal('modal-gallery');
+            renderGallery();
+            showToast("Gallery එකට එකතු විය!");
+        }
+
+        function deleteGalleryItem(id) {
+            appData.gallery = appData.gallery.filter(g => g.id !== id);
+            saveData();
+            renderGallery();
+        }
+
+        function openStockModal() {
+            document.getElementById('stock-name').value = "";
+            document.getElementById('stock-qty').value = "";
+            document.getElementById('stock-min').value = "2";
+            openModal('modal-stock');
+        }
+
+        function saveStockItem() {
+            const name = document.getElementById('stock-name').value.trim();
+            const category = document.getElementById('stock-category').value;
+            const qty = Number(document.getElementById('stock-qty').value) || 0;
+            const unit = document.getElementById('stock-unit').value;
+            const min = Number(document.getElementById('stock-min').value) || 1;
+
+            if (!name) {
+                showToast("කරුණාකර රෙදි හෝ ද්‍රව්‍යයේ නම ලියන්න!");
+                return;
+            }
+
+            appData.stock.unshift({
+                id: "s_" + Date.now(),
+                name,
+                category,
+                qty,
+                unit,
+                min
+            });
+
+            saveData();
+            closeModal('modal-stock');
+            renderInventory();
+            renderHome();
+            showToast("තොගය සුරකින ලදී!");
+        }
+
+        function adjustStockQty(id, delta) {
+            const item = appData.stock.find(s => s.id === id);
+            if (!item) return;
+            item.qty = Math.max(0, Number(((Number(item.qty) || 0) + delta).toFixed(2)));
+            saveData();
+            renderInventory();
+            renderHome();
+        }
+
+        function deleteStockItem(id) {
+            appData.stock = appData.stock.filter(s => s.id !== id);
+            saveData();
+            renderInventory();
+            renderHome();
+        }
+
+        function openMachineModal() {
+            document.getElementById('machine-name').value = "";
+            document.getElementById('machine-notes').value = "";
+            openModal('modal-machine');
+        }
+
+        function saveMachine() {
+            const name = document.getElementById('machine-name').value.trim();
+            const status = document.getElementById('machine-status').value;
+            const notes = document.getElementById('machine-notes').value.trim();
+            if (!name) {
+                showToast("කරුණාකර මැෂිමේ නම ඇතුළත් කරන්න!");
+                return;
+            }
+
+            appData.machines.unshift({
+                id: "m_" + Date.now(),
+                name,
+                status,
+                notes
+            });
+
+            saveData();
+            closeModal('modal-machine');
+            renderInventory();
+            showToast("මැෂිම එකතු කරන ලදී!");
+        }
+
+        function deleteMachine(id) {
+            appData.machines = appData.machines.filter(m => m.id !== id);
+            saveData();
+            renderInventory();
+        }
+
+        function renderInventory() {
+            const lowItems = appData.stock.filter(s => Number(s.qty) <= Number(s.min));
+            const alertBanner = document.getElementById('inventory-alert-banner');
+            if (lowItems.length > 0) {
+                alertBanner.classList.remove('hidden');
+                document.getElementById('inventory-alert-items').innerText =
+                    lowItems.map(i => `${i.name}: ${i.qty} ${i.unit}`).join(' | ');
+            } else {
+                alertBanner.classList.add('hidden');
+            }
+
+            const stockContainer = document.getElementById('stock-list');
+            stockContainer.innerHTML = appData.stock.map(s => {
+                const isLow = Number(s.qty) <= Number(s.min);
+                return `
+                    <div class="soft-card rounded-2xl p-3.5 flex items-center justify-between gap-2 ${isLow ? 'border-red-300 bg-red-50/40' : ''}">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <h4 class="text-xs font-bold text-slate-800 truncate">${s.name}</h4>
+                                ${isLow ? `<span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">අඩුයි!</span>` : ''}
+                            </div>
+                            <p class="text-[10px] text-pinktheme-600 truncate">${s.category}</p>
+                            <p class="text-xs font-bold mt-1 ${isLow ? 'text-red-600' : 'text-slate-700'}">ඉතිරි: ${s.qty} ${s.unit}</p>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button onclick="adjustStockQty('${s.id}', -1)" class="w-8 h-8 rounded-xl bg-pinktheme-100 text-pinktheme-700 font-bold">-</button>
+                            <button onclick="adjustStockQty('${s.id}', 1)" class="w-8 h-8 rounded-xl bg-pinktheme-600 text-white font-bold">+</button>
+                            <button onclick="deleteStockItem('${s.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            const machineContainer = document.getElementById('machines-list');
+            machineContainer.innerHTML = appData.machines.map(m => {
+                const needsService = m.status.includes('Needs Service') || m.status.includes('සර්විස්');
+                return `
+                    <div class="soft-card rounded-2xl p-3.5 flex items-center justify-between gap-2">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-800">${m.name}</h4>
+                            <span class="inline-block mt-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full ${needsService ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}">
+                                ${m.status}
+                            </span>
+                            ${m.notes ? `<p class="text-[11px] text-slate-500 mt-1">${m.notes}</p>` : ''}
+                        </div>
+                        <button onclick="deleteMachine('${m.id}')" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
+            }).join('');
+        }
+
+        function openTransactionModal() {
+            document.getElementById('trans-type').value = "income";
+            document.getElementById('trans-desc').value = "";
+            document.getElementById('trans-amount').value = "";
+            document.getElementById('trans-date').value = getOffsetDate(0);
+            openModal('modal-transaction');
+        }
+
+        function saveTransaction() {
+            const type = document.getElementById('trans-type').value;
+            const desc = document.getElementById('trans-desc').value.trim();
+            const amount = Number(document.getElementById('trans-amount').value) || 0;
+            const date = document.getElementById('trans-date').value || getOffsetDate(0);
+
+            if (!desc || amount <= 0) {
+                showToast("කරුණාකර විස්තරය සහ මුදල ඇතුළත් කරන්න!");
+                return;
+            }
+
+            appData.transactions.unshift({
+                id: "t_" + Date.now(),
+                type,
+                desc,
+                amount,
+                date
+            });
+
+            saveData();
+            closeModal('modal-transaction');
+            renderFinance();
+            renderHome();
+            showToast("ගනුදෙනුව සටහන් කරන ලදී!");
+        }
+
+        function deleteTransaction(id) {
+            appData.transactions = appData.transactions.filter(t => t.id !== id);
+            saveData();
+            renderFinance();
+            renderHome();
+        }
+
+        function getFinanceStatsForMonth(monthStr) {
+            const items = appData.transactions.filter(t => (t.date || '').startsWith(monthStr));
+            const income = items.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount || 0), 0);
+            const shopExp = items.filter(t => t.type === 'shop_expense').reduce((s, t) => s + Number(t.amount || 0), 0);
+            const homeExp = items.filter(t => t.type === 'home_expense').reduce((s, t) => s + Number(t.amount || 0), 0);
+            const profit = income - shopExp;
+            const remaining = profit - homeExp;
+            return { items, income, shopExp, homeExp, profit, remaining };
+        }
+
+        function renderFinance() {
+            const picker = document.getElementById('finance-month-picker');
+            if (!picker.value) picker.value = getCurrentMonthStr();
+            const monthVal = picker.value;
+
+            const stats = getFinanceStatsForMonth(monthVal);
+            document.getElementById('fin-income').innerText = stats.income.toLocaleString();
+            document.getElementById('fin-shop-exp').innerText = stats.shopExp.toLocaleString();
+            document.getElementById('fin-profit').innerText = stats.profit.toLocaleString();
+            document.getElementById('fin-home-exp').innerText = stats.homeExp.toLocaleString();
+            document.getElementById('fin-remaining').innerText = stats.remaining.toLocaleString();
+
+            const listEl = document.getElementById('transactions-list');
+            if (stats.items.length === 0) {
+                listEl.innerHTML = `<div class="soft-card rounded-2xl p-5 text-center text-xs text-slate-400">මෙම මාසයේ ගනුදෙනු සටහන් නොමැත.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = stats.items.map(t => {
+                let badge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">ආදායම</span>`;
+                let amtColor = "text-emerald-600";
+                let sign = "+";
+
+                if (t.type === 'shop_expense') {
+                    badge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">ව්‍යාපාර වියදම්</span>`;
+                    amtColor = "text-rose-600";
+                    sign = "-";
+                } else if (t.type === 'home_expense') {
+                    badge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">ගෙදර වියදම්</span>`;
+                    amtColor = "text-amber-600";
+                    sign = "-";
+                }
+
+                return `
+                    <div class="soft-card rounded-2xl p-3 flex items-center justify-between gap-2">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                ${badge}
+                                <span class="text-[10px] text-slate-400">${t.date}</span>
+                            </div>
+                            <p class="text-xs font-semibold text-slate-800 mt-1">${t.desc}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold ${amtColor}">${sign} Rs.${Number(t.amount).toLocaleString()}</span>
+                            <button onclick="deleteTransaction('${t.id}')" class="text-slate-300 hover:text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function downloadMonthlyPDF() {
+            const monthVal = document.getElementById('finance-month-picker').value || getCurrentMonthStr();
+            const stats = getFinanceStatsForMonth(monthVal);
+
+            document.getElementById('pdf-meta').innerText = `මාසය (Month): ${monthVal} | අයිතිකරු: ${appData.owner.name}`;
+            document.getElementById('pdf-inc').innerText = stats.income.toLocaleString();
+            document.getElementById('pdf-shop').innerText = stats.shopExp.toLocaleString();
+            document.getElementById('pdf-prof').innerText = stats.profit.toLocaleString();
+            document.getElementById('pdf-home').innerText = stats.homeExp.toLocaleString();
+            document.getElementById('pdf-rem').innerText = stats.remaining.toLocaleString();
+
+            const tbody = document.getElementById('pdf-tbody');
+            tbody.innerHTML = stats.items.map(t => {
+                const label = t.type === 'income' ? 'ආදායම (Income)' : (t.type === 'shop_expense' ? 'ව්‍යාපාර වියදම්' : 'ගෙදර වියදම්');
+                return `
+                    <tr>
+                        <td style="padding: 7px; border: 1px solid #fecdd9;">${t.date}</td>
+                        <td style="padding: 7px; border: 1px solid #fecdd9;">${t.desc}</td>
+                        <td style="padding: 7px; border: 1px solid #fecdd9;">${label}</td>
+                        <td style="padding: 7px; border: 1px solid #fecdd9; text-align: right; font-weight: bold;">Rs. ${Number(t.amount).toLocaleString()}</td>
+                    </tr>`;
+            }).join('') || `<tr><td colspan="4" style="padding: 10px; text-align: center;">ගනුදෙනු නොමැත</td></tr>`;
+
+            const element = document.getElementById('pdf-export-template');
+            const opt = {
+                margin: 0.3,
+                filename: `Prashansa_Tailors_Summary_${monthVal}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            showToast("PDF වාර්තාව සකස් වෙමින් පවතී...");
+            html2pdf().set(opt).from(element).save().then(() => {
+                showToast("PDF වාර්තාව Download විය!");
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            populateCategoryDropdowns();
+            document.getElementById('finance-month-picker').value = getCurrentMonthStr();
+            renderHome();
+        });
+    </script>
+</body>
+</html>
